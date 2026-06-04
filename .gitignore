@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Node
+node_modules/
+
+# Build files
+dist/
+build/
+
+# Audio outputs
+outputs/generated_audio/*.mp3
+
+# Uploaded audio
+audio_uploads/
+
+# ChromaDB
+chroma_db/
+
+# IDE
+.idea/
+.vscode/

@@ -1,0 +1,16 @@
+Run both:
+
+Backend
+uvicorn api:api --reload
+Frontend
+cd frontend
+npm run dev
+
+Then open:
+
+http://localhost:5173
+
+http://127.0.0.1:8000/docs
+
+until step 20
+did step 17
