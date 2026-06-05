@@ -7,11 +7,14 @@ def book_appointment(
         date,
         time
 ):
+
     appointment = {
+
         "customer": customer,
         "service": service,
         "date": date,
         "time": time
+
     }
 
     appointments.insert_one(
@@ -20,25 +23,8 @@ def book_appointment(
 
     return (
         f"Appointment booked for "
-        f"{customer} on "
-        f"{date} at {time}"
-    )
-
-def cancel_appointment(
-        customer
-):
-
-    result = appointments.delete_one(
-        {
-            "customer": customer
-        }
-    )
-
-    if result.deleted_count > 0:
-        return (
-            "Appointment cancelled."
-        )
-
-    return (
-        "No appointment found."
+        f"{customer} "
+        f"for {service} "
+        f"on {date} "
+        f"at {time}"
     )

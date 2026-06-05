@@ -4,34 +4,34 @@ from voice_agents.state import AgentState
 from voice_agents.intent_classifier import classify_intent
 
 from agent import llm
-from tools.booking_tool import book_appointment
 from rag_chat import get_answer
 
+from tools.conversational_booking import conversational_book
 
-# -----------------------------
-# Intent Detection Node
-# -----------------------------
+
+# ==========================
+# Intent Node
+# ==========================
 def intent_node(state):
 
     question = state["question"]
 
-    intent = classify_intent(question)
+    intent = classify_intent(
+        question
+    )
 
     return {
         "intent": intent
     }
 
 
-# -----------------------------
+# ==========================
 # Booking Node
-# -----------------------------
+# ==========================
 def booking_node(state):
 
-    result = book_appointment(
-        customer="Pawan",
-        service="Haircut",
-        date="2026-06-15",
-        time="3 PM"
+    result = conversational_book(
+        state["question"]
     )
 
     return {
@@ -39,9 +39,9 @@ def booking_node(state):
     }
 
 
-# -----------------------------
-# FAQ / RAG Node
-# -----------------------------
+# ==========================
+# FAQ Node (RAG)
+# ==========================
 def faq_node(state):
 
     answer = get_answer(
@@ -53,9 +53,9 @@ def faq_node(state):
     }
 
 
-# -----------------------------
+# ==========================
 # General Chat Node
-# -----------------------------
+# ==========================
 def chat_node(state):
 
     response = llm.invoke(
@@ -67,18 +67,20 @@ def chat_node(state):
     }
 
 
-# -----------------------------
+# ==========================
 # Router
-# -----------------------------
+# ==========================
 def route_intent(state):
 
     return state["intent"]
 
 
-# -----------------------------
+# ==========================
 # Build Graph
-# -----------------------------
-graph = StateGraph(AgentState)
+# ==========================
+graph = StateGraph(
+    AgentState
+)
 
 graph.add_node(
     "intent",
@@ -100,10 +102,10 @@ graph.add_node(
     chat_node
 )
 
-# Entry Point
-graph.set_entry_point("intent")
+graph.set_entry_point(
+    "intent"
+)
 
-# Routing Logic
 graph.add_conditional_edges(
     "intent",
     route_intent,
@@ -114,29 +116,39 @@ graph.add_conditional_edges(
     }
 )
 
-# End Nodes
-graph.add_edge("booking", END)
-graph.add_edge("faq", END)
-graph.add_edge("chat", END)
+graph.add_edge(
+    "booking",
+    END
+)
 
-# Compile Graph
+graph.add_edge(
+    "faq",
+    END
+)
+
+graph.add_edge(
+    "chat",
+    END
+)
+
 app = graph.compile()
 
 
-# -----------------------------
-# Main Loop
-# -----------------------------
+# ==========================
+# Terminal Testing
+# ==========================
 if __name__ == "__main__":
 
     print("\nVoice Agent Started")
-    print("Type 'exit' to quit.\n")
+    print("Type 'exit' to quit.")
 
     while True:
 
-        question = input("Ask: ")
+        question = input(
+            "\nAsk: "
+        )
 
         if question.lower() == "exit":
-            print("Goodbye!")
             break
 
         result = app.invoke(
@@ -147,6 +159,10 @@ if __name__ == "__main__":
             }
         )
 
-        print("\nAnswer:")
-        print(result["answer"])
-        print()
+        print(
+            "\nAnswer:"
+        )
+
+        print(
+            result["answer"]
+        )
