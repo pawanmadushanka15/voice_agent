@@ -6,12 +6,19 @@ from voice_agents.intent_classifier import classify_intent
 from agent import llm
 from rag_chat import get_answer
 
-from tools.conversational_booking import conversational_book
+from tools.conversational_booking import (
+    conversational_book
+)
+
+from tools.cancel_booking import (
+    cancel_booking
+)
+
+from tools.reschedule_booking import (
+    reschedule_booking
+)
 
 
-# ==========================
-# Intent Node
-# ==========================
 def intent_node(state):
 
     question = state["question"]
@@ -25,9 +32,6 @@ def intent_node(state):
     }
 
 
-# ==========================
-# Booking Node
-# ==========================
 def booking_node(state):
 
     result = conversational_book(
@@ -39,9 +43,26 @@ def booking_node(state):
     }
 
 
-# ==========================
-# FAQ Node (RAG)
-# ==========================
+def cancel_node(state):
+
+    result = cancel_booking()
+
+    return {
+        "answer": result
+    }
+
+
+def reschedule_node(state):
+
+    result = reschedule_booking(
+        state["question"]
+    )
+
+    return {
+        "answer": result
+    }
+
+
 def faq_node(state):
 
     answer = get_answer(
@@ -53,9 +74,6 @@ def faq_node(state):
     }
 
 
-# ==========================
-# General Chat Node
-# ==========================
 def chat_node(state):
 
     response = llm.invoke(
@@ -67,17 +85,11 @@ def chat_node(state):
     }
 
 
-# ==========================
-# Router
-# ==========================
 def route_intent(state):
 
     return state["intent"]
 
 
-# ==========================
-# Build Graph
-# ==========================
 graph = StateGraph(
     AgentState
 )
@@ -90,6 +102,16 @@ graph.add_node(
 graph.add_node(
     "booking",
     booking_node
+)
+
+graph.add_node(
+    "cancel",
+    cancel_node
+)
+
+graph.add_node(
+    "reschedule",
+    reschedule_node
 )
 
 graph.add_node(
@@ -111,6 +133,8 @@ graph.add_conditional_edges(
     route_intent,
     {
         "BOOKING": "booking",
+        "CANCEL": "cancel",
+        "RESCHEDULE": "reschedule",
         "FAQ": "faq",
         "GENERAL": "chat"
     }
@@ -118,6 +142,16 @@ graph.add_conditional_edges(
 
 graph.add_edge(
     "booking",
+    END
+)
+
+graph.add_edge(
+    "cancel",
+    END
+)
+
+graph.add_edge(
+    "reschedule",
     END
 )
 
@@ -133,10 +167,6 @@ graph.add_edge(
 
 app = graph.compile()
 
-
-# ==========================
-# Terminal Testing
-# ==========================
 if __name__ == "__main__":
 
     print("\nVoice Agent Started")

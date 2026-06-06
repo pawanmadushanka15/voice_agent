@@ -1,20 +1,25 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebase";
 
 function App() {
 
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState("");
-
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // ==========================
-  // Load Conversation History
-  // ==========================
   useEffect(() => {
     loadHistory();
   }, []);
+
+const logout = async () => {
+
+  await signOut(auth);
+
+};
 
   const loadHistory = async () => {
 
@@ -52,9 +57,6 @@ function App() {
     }
   };
 
-  // ==========================
-  // Clear History
-  // ==========================
   const clearHistory = async () => {
 
     try {
@@ -74,9 +76,6 @@ function App() {
     }
   };
 
-  // ==========================
-  // Play Audio
-  // ==========================
   const playAudio = async (text) => {
 
     try {
@@ -111,9 +110,6 @@ function App() {
     }
   };
 
-  // ==========================
-  // Ask Agent
-  // ==========================
   const askAgent = async (
     userQuestion = question
   ) => {
@@ -131,6 +127,8 @@ function App() {
     ]);
 
     try {
+
+      setLoading(true);
 
       const response =
         await axios.post(
@@ -168,12 +166,14 @@ function App() {
           text: "Error contacting AI Agent."
         }
       ]);
+
+    } finally {
+
+      setLoading(false);
+
     }
   };
 
-  // ==========================
-  // Start Recording
-  // ==========================
   const startRecording = async () => {
 
     try {
@@ -227,9 +227,7 @@ function App() {
           const transcript =
             response.data.transcript;
 
-          setQuestion(
-            transcript
-          );
+          setQuestion(transcript);
 
           await askAgent(
             transcript
@@ -261,9 +259,6 @@ function App() {
     }
   };
 
-  // ==========================
-  // Stop Recording
-  // ==========================
   const stopRecording = () => {
 
     if (mediaRecorder) {
@@ -276,34 +271,77 @@ function App() {
   };
 
   return (
+
     <div
-      style={{
-        maxWidth: "1000px",
-        margin: "0 auto",
-        padding: "30px"
-      }}
+      className="
+      max-w-5xl
+      mx-auto
+      p-4
+      md:p-8
+      min-h-screen
+      "
     >
 
-      <h1>🎙 Voice AI Agent</h1>
-
-      <button
-        onClick={clearHistory}
-        style={{
-          marginBottom: "20px",
-          padding: "10px"
-        }}
+      <h1
+        className="
+        text-4xl
+        font-bold
+        text-center
+        mb-3
+        "
       >
-        Clear History
-      </button>
+        Salon AI Receptionist
+      </h1>
+
+      <p
+  className="
+  text-center
+  text-gray-500
+  mb-6
+  "
+>
+  Book appointments using voice or text
+</p>
+
+<div className="mb-4">
+
+  <button
+    onClick={clearHistory}
+    className="
+    px-4
+    py-2
+    border
+    rounded
+    mr-2
+    "
+  >
+    Clear History
+  </button>
+
+  <button
+    onClick={logout}
+    className="
+    px-4
+    py-2
+    border
+    rounded
+    "
+  >
+    Logout
+  </button>
+
+</div>
 
       <div
-        style={{
-          border: "1px solid #ccc",
-          minHeight: "500px",
-          padding: "20px",
-          overflowY: "auto",
-          marginBottom: "20px"
-        }}
+        className="
+        border
+        rounded
+        p-4
+        min-h-[500px]
+        max-h-[600px]
+        overflow-y-auto
+        mb-4
+        "
       >
 
         {messages.map(
@@ -311,81 +349,135 @@ function App() {
 
             <div
               key={index}
-              style={{
-                marginBottom: "15px"
-              }}
+              className={`
+                mb-4
+                flex
+                ${
+                  msg.role === "user"
+                    ? "justify-end"
+                    : "justify-start"
+                }
+              `}
             >
 
-              <strong>
-                {msg.role === "user"
-                  ? "You"
-                  : "AI"}
-              </strong>
+              <div
+                className="
+                max-w-[80%]
+                border
+                rounded-lg
+                p-3
+                "
+              >
 
-              <p>{msg.text}</p>
+                <strong>
+                  {msg.role === "user"
+                    ? "You"
+                    : "AI"}
+                </strong>
+
+                <p>{msg.text}</p>
+
+              </div>
 
             </div>
           )
         )}
 
-      </div>
+        {
+          loading && (
 
-      <input
-        value={question}
-        onChange={(e) =>
-          setQuestion(
-            e.target.value
+            <div
+              className="
+              text-gray-500
+              italic
+              "
+            >
+              AI is thinking...
+            </div>
+
           )
         }
-        placeholder="Ask anything..."
-        style={{
-          width: "60%",
-          padding: "10px"
-        }}
-      />
 
-      <button
-        onClick={() =>
-          askAgent()
-        }
-        style={{
-          marginLeft: "10px",
-          padding: "10px"
-        }}
-      >
-        Send
-      </button>
-
-      <button
-        onClick={startRecording}
-        disabled={recording}
-        style={{
-          marginLeft: "10px",
-          padding: "10px"
-        }}
-      >
-        🎤 Start
-      </button>
-
-      <button
-        onClick={stopRecording}
-        disabled={!recording}
-        style={{
-          marginLeft: "10px",
-          padding: "10px"
-        }}
-      >
-        ⏹ Stop
-      </button>
+      </div>
 
       <div
-        style={{
-          marginTop: "15px"
-        }}
+        className="
+        flex
+        flex-col
+        md:flex-row
+        gap-3
+        "
       >
-        {recording
-          ? "🔴 Recording..."
-          : "⚪ Not Recording"}
+
+        <input
+          value={question}
+          onChange={(e) =>
+            setQuestion(
+              e.target.value
+            )
+          }
+          placeholder="Ask anything..."
+          className="
+          flex-1
+          border
+          rounded
+          p-3
+          "
+        />
+
+        <button
+          onClick={() =>
+            askAgent()
+          }
+          className="
+          px-5
+          py-3
+          border
+          rounded
+          "
+        >
+          Send
+        </button>
+
+        <button
+          onClick={startRecording}
+          disabled={recording}
+          className="
+          px-5
+          py-3
+          border
+          rounded
+          "
+        >
+          🎤 Start
+        </button>
+
+        <button
+          onClick={stopRecording}
+          disabled={!recording}
+          className="
+          px-5
+          py-3
+          border
+          rounded
+          "
+        >
+          ⏹ Stop
+        </button>
+
+      </div>
+
+      <div
+        className="
+        mt-4
+        text-center
+        "
+      >
+        {
+          recording
+            ? "🔴 Recording..."
+            : "⚪ Not Recording"
+        }
       </div>
 
     </div>

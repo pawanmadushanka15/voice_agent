@@ -19,6 +19,12 @@ from database.chat_history import (
     get_conversations
 )
 
+from bson import ObjectId
+from database.mongo import appointments
+from database.appointments import (
+    get_all_appointments
+)
+
 api = FastAPI()
 
 api.add_middleware(
@@ -32,6 +38,13 @@ api.add_middleware(
 
 class ChatRequest(BaseModel):
     question: str
+
+class AppointmentUpdate(BaseModel):
+
+    customer: str
+    service: str
+    date: str
+    time: str
 
 
 @api.post("/chat")
@@ -111,4 +124,99 @@ def clear_history():
 
     return {
         "message": "History cleared"
+    }
+
+# ==========================
+# Admin Dashboard APIs
+# ==========================
+
+@api.get("/appointments")
+def all_appointments():
+
+    return get_all_appointments()
+
+
+@api.delete("/appointments/{appointment_id}")
+def delete_appointment(
+        appointment_id: str
+):
+
+    appointments.delete_one(
+        {
+            "_id":
+                ObjectId(
+                    appointment_id
+                )
+        }
+    )
+
+    return {
+        "message":
+            "Appointment deleted"
+    }
+
+
+@api.put("/appointments/{appointment_id}")
+def update_appointment(
+        appointment_id: str,
+        appointment: AppointmentUpdate
+):
+
+    appointments.update_one(
+        {
+            "_id":
+                ObjectId(
+                    appointment_id
+                )
+        },
+        {
+            "$set": {
+
+                "customer":
+                    appointment.customer,
+
+                "service":
+                    appointment.service,
+
+                "date":
+                    appointment.date,
+
+                "time":
+                    appointment.time
+            }
+        }
+    )
+
+    return {
+        "message":
+            "Appointment updated"
+    }
+
+
+@api.get("/dashboard-stats")
+def dashboard_stats():
+
+    total = (
+        appointments.count_documents(
+            {}
+        )
+    )
+
+    haircut_count = (
+        appointments.count_documents(
+            {
+                "service":
+                    "Haircut"
+            }
+        )
+    )
+
+    return {
+
+        "totalAppointments":
+            total,
+
+        "haircuts":
+            haircut_count
+
     }
