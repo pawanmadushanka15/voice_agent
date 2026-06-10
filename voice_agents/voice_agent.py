@@ -35,7 +35,9 @@ def intent_node(state):
 def booking_node(state):
 
     result = conversational_book(
-        state["question"]
+        state["question"],
+        state["user_id"],
+        state["email"]
     )
 
     return {
@@ -184,6 +186,8 @@ if __name__ == "__main__":
         result = app.invoke(
             {
                 "question": question,
+                "user_id": "terminal_user",
+                "email": "terminal@example.com",
                 "intent": "",
                 "answer": ""
             }

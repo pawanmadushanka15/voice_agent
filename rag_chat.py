@@ -1,12 +1,12 @@
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
 
 llm = ChatGroq(
-    model="openai/gpt-oss-120b"
+    model="llama3-70b-8192"
 )
 
 embedding = HuggingFaceEmbeddings(
@@ -18,18 +18,22 @@ db = Chroma(
     embedding_function=embedding
 )
 
-
 def get_answer(question):
 
-    docs = db.similarity_search(question)
+    # Retrieve top 4 most relevant chunks
+    docs = db.similarity_search(question, k=4)
 
     if not docs:
-        return "No relevant information found."
+        return "I couldn't find any relevant information in my knowledge base."
 
-    context = docs[0].page_content
+    # Join the page content of the retrieved chunks
+    context = "\n\n".join([doc.page_content for doc in docs])
 
     prompt = f"""
-Answer only using the provided context.
+You are a knowledgeable and helpful AI salon receptionist. 
+You can answer questions related to the salon's Services, Pricing, Promotions, and Salon policies.
+Answer ONLY using the provided context below. Do not make up information or hallucinate.
+If the context does not contain the answer, politely state that you don't have that information.
 
 Context:
 {context}
@@ -45,6 +49,7 @@ Question:
 
 if __name__ == "__main__":
 
+    print("\nSalon Assistant Ready. Ask me about Services, Pricing, Promotions, or Policies.")
     while True:
 
         question = input("\nAsk: ")

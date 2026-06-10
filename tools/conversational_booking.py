@@ -20,7 +20,8 @@ from tools.availability_checker import (
 
 def conversational_book(
         question,
-        user_id="pawan"
+        user_id,
+        email
 ):
 
     details = extract_booking_details(
@@ -139,7 +140,9 @@ def conversational_book(
 
     result = book_appointment(
 
-        customer="Pawan",
+        user_id=user_id,
+
+        customer=email,
 
         service=session["service"],
 

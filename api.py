@@ -15,21 +15,31 @@ from speech.tts import text_to_speech
 from database.chat_history import (
     save_conversation
 )
+
 from database.chat_history import (
     get_conversations
 )
 
 from bson import ObjectId
+
 from database.mongo import appointments
+
 from database.appointments import (
     get_all_appointments
+)
+
+from database.conversations import (
+    conversations
 )
 
 api = FastAPI()
 
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,13 +47,22 @@ api.add_middleware(
 
 
 class ChatRequest(BaseModel):
+
     question: str
+
+    user_id: str
+
+    email: str
+
 
 class AppointmentUpdate(BaseModel):
 
     customer: str
+
     service: str
+
     date: str
+
     time: str
 
 
@@ -52,9 +71,20 @@ def chat(request: ChatRequest):
 
     result = agent_app.invoke(
         {
-            "question": request.question,
+
+            "question":
+                request.question,
+
+            "user_id":
+                request.user_id,
+
+            "email":
+                request.email,
+
             "intent": "",
+
             "answer": ""
+
         }
     )
 
@@ -64,8 +94,10 @@ def chat(request: ChatRequest):
     )
 
     return {
-        "answer": result["answer"]
+        "answer":
+            result["answer"]
     }
+
 
 @api.post("/speech-to-text")
 async def transcribe_audio(
@@ -77,7 +109,10 @@ async def transcribe_audio(
         exist_ok=True
     )
 
-    file_path = f"audio_uploads/{file.filename}"
+    file_path = (
+        f"audio_uploads/"
+        f"{file.filename}"
+    )
 
     with open(
             file_path,
@@ -94,11 +129,15 @@ async def transcribe_audio(
     )
 
     return {
-        "transcript": transcript
+        "transcript":
+            transcript
     }
 
+
 @api.post("/text-to-speech")
-def generate_speech(request: ChatRequest):
+def generate_speech(
+        request: ChatRequest
+):
 
     audio_path = text_to_speech(
         request.question
@@ -110,21 +149,25 @@ def generate_speech(request: ChatRequest):
         filename="response.mp3"
     )
 
+
 @api.get("/conversations")
 def conversation_history():
 
     return get_conversations()
 
-from database.conversations import conversations
 
 @api.delete("/conversations")
 def clear_history():
 
-    conversations.delete_many({})
+    conversations.delete_many(
+        {}
+    )
 
     return {
-        "message": "History cleared"
+        "message":
+            "History cleared"
     }
+
 
 # ==========================
 # Admin Dashboard APIs
@@ -136,7 +179,9 @@ def all_appointments():
     return get_all_appointments()
 
 
-@api.delete("/appointments/{appointment_id}")
+@api.delete(
+    "/appointments/{appointment_id}"
+)
 def delete_appointment(
         appointment_id: str
 ):
@@ -156,10 +201,16 @@ def delete_appointment(
     }
 
 
-@api.put("/appointments/{appointment_id}")
+@api.put(
+    "/appointments/{appointment_id}"
+)
 def update_appointment(
+
         appointment_id: str,
-        appointment: AppointmentUpdate
+
+        appointment:
+        AppointmentUpdate
+
 ):
 
     appointments.update_one(
@@ -183,6 +234,7 @@ def update_appointment(
 
                 "time":
                     appointment.time
+
             }
         }
     )
@@ -220,3 +272,27 @@ def dashboard_stats():
             haircut_count
 
     }
+
+@api.get("/analytics/total")
+def analytics_total():
+    total = appointments.count_documents({})
+    return {"total": total}
+
+@api.get("/analytics/services")
+def analytics_services():
+    pipeline = [
+        {"$group": {"_id": "$service", "count": {"$sum": 1}}}
+    ]
+    result = list(appointments.aggregate(pipeline))
+    formatted_result = [{"service": item["_id"], "count": item["count"]} for item in result]
+    return formatted_result
+
+@api.get("/analytics/dates")
+def analytics_dates():
+    pipeline = [
+        {"$group": {"_id": "$date", "count": {"$sum": 1}}},
+        {"$sort": {"_id": 1}}
+    ]
+    result = list(appointments.aggregate(pipeline))
+    formatted_result = [{"date": item["_id"], "count": item["count"]} for item in result]
+    return formatted_result
