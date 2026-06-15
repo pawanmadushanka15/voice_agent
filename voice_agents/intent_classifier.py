@@ -1,4 +1,11 @@
-def classify_intent(question):
+from database.mongo import db
+
+def classify_intent(question, user_id=None):
+
+    if user_id:
+        active_session = db.sessions.find_one({"user_id": user_id})
+        if active_session:
+            return "BOOKING"
 
     question = question.lower()
 

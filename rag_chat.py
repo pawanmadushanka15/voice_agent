@@ -6,7 +6,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 load_dotenv()
 
 llm = ChatGroq(
-    model="llama3-70b-8192"
+    model="llama-3.3-70b-versatile"
 )
 
 embedding = HuggingFaceEmbeddings(

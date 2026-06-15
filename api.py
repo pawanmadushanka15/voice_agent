@@ -90,7 +90,9 @@ def chat(request: ChatRequest):
 
     save_conversation(
         request.question,
-        result["answer"]
+        result["answer"],
+        request.user_id,
+        request.email
     )
 
     return {
@@ -151,16 +153,16 @@ def generate_speech(
 
 
 @api.get("/conversations")
-def conversation_history():
+def conversation_history(user_id: str = "anonymous"):
 
-    return get_conversations()
+    return get_conversations(user_id)
 
 
 @api.delete("/conversations")
-def clear_history():
+def clear_history(user_id: str = "anonymous"):
 
     conversations.delete_many(
-        {}
+        {"user_id": user_id}
     )
 
     return {

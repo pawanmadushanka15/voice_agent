@@ -24,7 +24,8 @@ def intent_node(state):
     question = state["question"]
 
     intent = classify_intent(
-        question
+        question,
+        state["user_id"]
     )
 
     return {

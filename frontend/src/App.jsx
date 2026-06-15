@@ -33,8 +33,10 @@ function App() {
   }, [messages, loading]);
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    if (user?.uid) {
+      loadHistory();
+    }
+  }, [user?.uid]);
 
   const logout = async () => {
     await signOut(auth);
@@ -42,7 +44,9 @@ function App() {
 
   const loadHistory = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/conversations");
+      const response = await axios.get("http://127.0.0.1:8000/conversations", {
+        params: { user_id: user?.uid || "anonymous" }
+      });
       const history = [];
       response.data.forEach(item => {
         history.push({ role: "user", text: item.question });
@@ -56,7 +60,9 @@ function App() {
 
   const clearHistory = async () => {
     try {
-      await axios.delete("http://127.0.0.1:8000/conversations");
+      await axios.delete("http://127.0.0.1:8000/conversations", {
+        params: { user_id: user?.uid || "anonymous" }
+      });
       setMessages([]);
     } catch (error) {
       console.error("Failed to clear history", error);
