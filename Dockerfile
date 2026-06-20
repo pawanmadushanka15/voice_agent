@@ -18,8 +18,8 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p audio_uploads outputs/generated_audio
 
-# Expose the port (Koyeb uses 8000 by default, HF Spaces uses 7860)
-EXPOSE 8000
+# Hugging Face Spaces requires port 7860
+EXPOSE 7860
 
-# Start the FastAPI server
-CMD ["uvicorn", "api:api", "--host", "0.0.0.0", "--port", "8000"]
+# Start the FastAPI server on port 7860 (required by HF Spaces)
+CMD ["uvicorn", "api:api", "--host", "0.0.0.0", "--port", "7860"]
