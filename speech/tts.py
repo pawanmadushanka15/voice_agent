@@ -15,7 +15,7 @@ def text_to_speech(text):
 
     audio = client.generate(
         text=text,
-        voice="EXAVITQu4vr4xnSDxMaL",  # Sarah
+        voice="JBFqnCBsd6RMkjVDRZzb",  # George
         model="eleven_multilingual_v2"
     )
 

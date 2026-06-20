@@ -20,9 +20,11 @@ outputs/generated_audio/*.mp3
 # Uploaded audio
 audio_uploads/
 
-# ChromaDB
-chroma_db/
-
 # IDE
 .idea/
 .vscode/
+.gemini/
+
+# OS files
+.DS_Store
+Thumbs.db

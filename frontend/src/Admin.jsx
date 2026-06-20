@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "./api";
 import {
   PieChart,
   Pie,
@@ -24,7 +25,7 @@ function Admin() {
 
   const loadAppointments = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/appointments");
+      const response = await axios.get(`${API_BASE_URL}/appointments`);
       setAppointments(response.data);
     } catch (err) {
       console.error(err);
@@ -34,9 +35,9 @@ function Admin() {
   const loadAnalytics = async () => {
     try {
       const [totalRes, servicesRes, datesRes] = await Promise.all([
-        axios.get("http://127.0.0.1:8000/analytics/total"),
-        axios.get("http://127.0.0.1:8000/analytics/services"),
-        axios.get("http://127.0.0.1:8000/analytics/dates"),
+        axios.get(`${API_BASE_URL}/analytics/total`),
+        axios.get(`${API_BASE_URL}/analytics/services`),
+        axios.get(`${API_BASE_URL}/analytics/dates`),
       ]);
       setTotalAppointments(totalRes.data.total);
       setServicesData(servicesRes.data);
@@ -48,7 +49,7 @@ function Admin() {
 
   const deleteAppointment = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/appointments/${id}`);
+      await axios.delete(`${API_BASE_URL}/appointments/${id}`);
       loadAppointments();
       loadAnalytics();
     } catch (err) {

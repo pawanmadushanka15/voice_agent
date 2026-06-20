@@ -1,0 +1,15 @@
+# Don't send these to Docker
+.git
+.gitignore
+.env
+.idea
+.vscode
+__pycache__
+*.pyc
+node_modules
+frontend/node_modules
+frontend/dist
+audio_uploads
+outputs
+README.md
+*.md

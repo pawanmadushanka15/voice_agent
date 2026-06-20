@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import API_BASE_URL from "./api";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import { useAuth } from "./AuthContext";
@@ -44,7 +45,7 @@ function App() {
 
   const loadHistory = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/conversations", {
+      const response = await axios.get(`${API_BASE_URL}/conversations`, {
         params: { user_id: user?.uid || "anonymous" }
       });
       const history = [];
@@ -60,7 +61,7 @@ function App() {
 
   const clearHistory = async () => {
     try {
-      await axios.delete("http://127.0.0.1:8000/conversations", {
+      await axios.delete(`${API_BASE_URL}/conversations`, {
         params: { user_id: user?.uid || "anonymous" }
       });
       setMessages([]);
@@ -71,7 +72,7 @@ function App() {
 
   const playAudio = async (text) => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/text-to-speech", {
+      const response = await axios.post(`${API_BASE_URL}/text-to-speech`, {
         question: text,
         user_id: user?.uid || "anonymous",
         email: user?.email || "anonymous@example.com"
@@ -90,7 +91,7 @@ function App() {
     setMessages(prev => [...prev, userMessage]);
     try {
       setLoading(true);
-      const response = await axios.post("http://127.0.0.1:8000/chat", {
+      const response = await axios.post(`${API_BASE_URL}/chat`, {
         question: userQuestion,
         user_id: user?.uid || "anonymous",
         email: user?.email || "anonymous@example.com"
@@ -119,7 +120,7 @@ function App() {
         const formData = new FormData();
         formData.append("file", blob, "recording.wav");
         try {
-          const response = await axios.post("http://127.0.0.1:8000/speech-to-text", formData);
+          const response = await axios.post(`${API_BASE_URL}/speech-to-text`, formData);
           const transcript = response.data.transcript;
           setQuestion(transcript);
           await askAgent(transcript);

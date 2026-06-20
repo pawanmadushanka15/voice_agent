@@ -34,12 +34,16 @@ from database.conversations import (
 
 api = FastAPI()
 
+import os as _os
+_FRONTEND_URL = _os.getenv("FRONTEND_URL", "")
+
 api.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
+        "http://127.0.0.1:5173",
+        _FRONTEND_URL,  # Your Vercel production URL (set via env variable)
+    ] if _FRONTEND_URL else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
