@@ -37,17 +37,27 @@ api = FastAPI()
 import os as _os
 _FRONTEND_URL = _os.getenv("FRONTEND_URL", "")
 
+_allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if _FRONTEND_URL:
+    for _u in _FRONTEND_URL.split(","):
+        _cleaned = _u.strip().rstrip("/")
+        if _cleaned and _cleaned not in _allowed_origins:
+            _allowed_origins.append(_cleaned)
+else:
+    _allowed_origins = ["*"]
+
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        _FRONTEND_URL,  # Your Vercel production URL (set via env variable)
-    ] if _FRONTEND_URL else ["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@api.get("/")
+def health_check():
+    return {"status": "ok", "message": "Voice Agent API is running"}
 
 
 class ChatRequest(BaseModel):

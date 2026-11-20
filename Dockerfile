@@ -18,8 +18,8 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p audio_uploads outputs/generated_audio
 
-# Hugging Face Spaces requires port 7860
+# Expose port (default 7860 for Hugging Face Spaces)
 EXPOSE 7860
 
-# Start the FastAPI server on port 7860 (required by HF Spaces)
-CMD ["uvicorn", "api:api", "--host", "0.0.0.0", "--port", "7860"]
+# Start the FastAPI server using dynamic $PORT (fallback to 7860)
+CMD ["sh", "-c", "uvicorn api:api --host 0.0.0.0 --port ${PORT:-7860}"]
