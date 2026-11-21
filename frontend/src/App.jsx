@@ -23,10 +23,16 @@ function App() {
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const chatContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   };
 
   useEffect(() => {
@@ -145,13 +151,13 @@ function App() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-black min-h-screen text-white font-sans flex flex-col relative overflow-hidden">
+    <div className="bg-gradient-to-br from-slate-900 to-black h-screen text-white font-sans flex flex-col relative overflow-hidden">
       {/* Decorative blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
 
       {/* Header */}
-      <header className="fixed top-0 inset-x-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between">
+      <header className="flex-shrink-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
             Salon AI Receptionist
@@ -161,7 +167,7 @@ function App() {
         <div className="flex items-center space-x-3">
           <button 
             onClick={clearHistory}
-            className="flex items-center space-x-2 px-3 py-2 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 transition-colors cursor-pointer"
             title="Clear History"
           >
             <FaTrash className="text-slate-400" />
@@ -169,7 +175,7 @@ function App() {
           </button>
           <button 
             onClick={logout}
-            className="flex items-center space-x-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg text-sm text-red-400 transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg text-sm text-red-400 transition-colors cursor-pointer"
             title="Logout"
           >
             <FaSignOutAlt />
@@ -179,7 +185,10 @@ function App() {
       </header>
 
       {/* Chat Area */}
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 pt-28 pb-32 overflow-y-auto z-10 flex flex-col" style={{ scrollbarWidth: 'none' }}>
+      <main 
+        ref={chatContainerRef}
+        className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 overflow-y-auto z-10 flex flex-col"
+      >
         {messages.length === 0 && !loading && (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-500 space-y-4">
             <FaRobot className="w-16 h-16 text-slate-700" />
@@ -243,8 +252,8 @@ function App() {
       </main>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 inset-x-0 z-50 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pb-6 pt-10 px-4 pointer-events-none">
-        <div className="max-w-4xl mx-auto flex flex-col pointer-events-auto">
+      <footer className="flex-shrink-0 z-20 bg-slate-900/90 backdrop-blur-xl border-t border-white/10 px-4 py-4">
+        <div className="max-w-4xl mx-auto flex flex-col">
           {recording && (
             <div className="mb-3 flex items-center justify-center text-xs text-red-400 font-medium">
               <span className="w-2 h-2 bg-red-500 rounded-full animate-ping mr-2"></span>
@@ -255,7 +264,7 @@ function App() {
             
             <button
               onClick={recording ? stopRecording : startRecording}
-              className={`p-3 rounded-xl flex items-center justify-center transition-all ${
+              className={`p-3 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                 recording 
                   ? "bg-red-500/20 text-red-500 hover:bg-red-500/30" 
                   : "bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-700"
@@ -291,14 +300,14 @@ function App() {
             <button
               onClick={() => askAgent()}
               disabled={!question.trim() || loading || recording}
-              className="p-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-purple-500/25 transition-all transform hover:-translate-y-0.5 disabled:transform-none flex items-center justify-center"
+              className="p-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-purple-500/25 transition-all transform hover:-translate-y-0.5 disabled:transform-none flex items-center justify-center cursor-pointer"
             >
               <FaPaperPlane className="w-5 h-5" />
             </button>
 
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
